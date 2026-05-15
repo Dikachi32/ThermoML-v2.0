@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ThermoML — Weather Temperature Predictor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;700;900&family=JetBrains+Mono:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- External stylesheet (place in /static/style.css) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="page-wrap">
+
+    <!-- ── Top Bar ── -->
+    <div class="topbar">
+        <div class="logo">
+            <div class="logo-icon">🌡️</div>
+            <span class="logo-text">ThermoML</span>
+        </div>
+        <div class="topbar-status">
+            <span class="live-dot"></span>
+            ML v2.0 Active
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         LIVE WEATHER HERO
+    ══════════════════════════════════════ -->
+    <div class="weather-hero">
+        <div class="weather-card">
+
+            <div class="weather-loading" id="weatherLoading">
+                <div class="weather-spinner"></div>
+                <span class="weather-loading-text">Detecting your location &amp; fetching live forecast…</span>
+            </div>
+
+            <div class="weather-error" id="weatherError">
+                <span class="weather-error-icon">📡</span>
+                <div>
+                    <div class="weather-loading-text" style="color:var(--warm-amber);margin-bottom:4px;">Unable to fetch live weather</div>
+                    <div class="weather-loading-text">Location access was denied or the service is unavailable. You can still use the predictor below.</div>
+                </div>
+            </div>
+
+            <div class="weather-content" id="weatherContent">
+                <div class="weather-top">
+                    <div class="weather-left">
+                        <div class="weather-location">📍 <span id="wCity">—</span></div>
+                        <div class="weather-city" id="wCountry">—</div>
+                        <div class="weather-date" id="wDate">—</div>
+                    </div>
+                    <div class="weather-right">
+                        <div class="weather-icon-big" id="wIcon">—</div>
+                        <div class="weather-desc" id="wDesc">—</div>
+                    </div>
+                </div>
+
+                <div class="weather-temp-row">
+                    <div class="weather-temp-big" id="wTemp">--</div>
+                    <div class="weather-temp-unit">°C</div>
+                    <div class="weather-feels" id="wFeels"></div>
+                </div>
+
+                <div class="weather-stats">
+                    <div class="weather-stat">
+                        <span class="stat-icon">💧</span>
+                        <span class="stat-label">Humidity</span>
+                        <span class="stat-value cyan" id="wHumidity">--</span>
+                    </div>
+                    <div class="weather-stat">
+                        <span class="stat-icon">🌬️</span>
+                        <span class="stat-label">Wind</span>
+                        <span class="stat-value blue" id="wWind">--</span>
+                    </div>
+                    <div class="weather-stat">
+                        <span class="stat-icon">🌡️</span>
+                        <span class="stat-label">Pressure</span>
+                        <span class="stat-value" id="wPressure">--</span>
+                    </div>
+                    <div class="weather-stat">
+                        <span class="stat-icon">🌧️</span>
+                        <span class="stat-label">Rainfall</span>
+                        <span class="stat-value blue" id="wRain">--</span>
+                    </div>
+                    <div class="weather-stat">
+                        <span class="stat-icon">☀️</span>
+                        <span class="stat-label">UV Index</span>
+                        <span class="stat-value amber" id="wUV">--</span>
+                    </div>
+                </div>
+
+                <div class="forecast-strip-label">Hourly Forecast</div>
+                <div class="forecast-strip" id="wHourly"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         PREDICTION CARD
+    ══════════════════════════════════════ -->
+    <div class="card">
+
+        <div class="card-header">
+            <div class="eyebrow">ML Temperature Predictor</div>
+            <h1>Forecast <span class="hl">Surface Temp</span><br>with Machine Learning</h1>
+            <p class="subtitle">Enter atmospheric conditions and choose a model — get a precise temperature prediction powered by four trained ML algorithms.</p>
+        </div>
+
+        <div class="card-body">
+
+            <form action="" method="post">
+
+                <div class="section-label">Select ML Model</div>
+                <div class="model-tabs">
+                    <div class="model-tab">
+                        <input type="radio" id="m-ensemble" name="model" value="ensemble"
+                               {% if selected_model == 'ensemble' or not selected_model %}checked{% endif %}>
+                        <label for="m-ensemble">
+                            <span class="tab-icon">🏆</span>
+                            <span class="tab-name">Ensemble<br>Voting</span>
+                            <span class="tab-star">★ Best</span>
+                        </label>
+                    </div>
+                    <div class="model-tab">
+                        <input type="radio" id="m-gb" name="model" value="gb"
+                               {% if selected_model == 'gb' %}checked{% endif %}>
+                        <label for="m-gb">
+                            <span class="tab-icon">🚀</span>
+                            <span class="tab-name">Gradient<br>Boosting</span>
+                            <span class="tab-star">&nbsp;</span>
+                        </label>
+                    </div>
+                    <div class="model-tab">
+                        <input type="radio" id="m-rf" name="model" value="rf"
+                               {% if selected_model == 'rf' %}checked{% endif %}>
+                        <label for="m-rf">
+                            <span class="tab-icon">🌲</span>
+                            <span class="tab-name">Random<br>Forest</span>
+                            <span class="tab-star">&nbsp;</span>
+                        </label>
+                    </div>
+                    <div class="model-tab">
+                        <input type="radio" id="m-lr" name="model" value="lr"
+                               {% if selected_model == 'lr' %}checked{% endif %}>
+                        <label for="m-lr">
+                            <span class="tab-icon">📈</span>
+                            <span class="tab-name">Linear<br>Regression</span>
+                            <span class="tab-star">&nbsp;</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="fields-grid">
+                    <div class="field">
+                        <label for="day">Day of Year</label>
+                        <div class="input-wrap">
+                            <span class="input-icon">📅</span>
+                            <input type="number" id="day" name="day"
+                                   placeholder="e.g. 120" step="1" min="1" max="366"
+                                   value="{{ request.form.day if request.form.day else '' }}">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="humidity">Humidity (%)</label>
+                        <div class="input-wrap">
+                            <span class="input-icon">💧</span>
+                            <input type="number" id="humidity" name="humidity"
+                                   placeholder="e.g. 78" step="0.1" min="0" max="100"
+                                   value="{{ request.form.humidity if request.form.humidity else '' }}">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="pressure">Pressure (hPa)</label>
+                        <div class="input-wrap">
+                            <span class="input-icon">🌡️</span>
+                            <input type="number" id="pressure" name="pressure"
+                                   placeholder="e.g. 1013" step="0.1"
+                                   value="{{ request.form.pressure if request.form.pressure else '' }}">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="wind_speed">Wind Speed (km/h)</label>
+                        <div class="input-wrap">
+                            <span class="input-icon">💨</span>
+                            <input type="number" id="wind_speed" name="wind_speed"
+                                   placeholder="e.g. 15" step="0.1" min="0"
+                                   value="{{ request.form.wind_speed if request.form.wind_speed else '' }}">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="rainfall">Rainfall (mm)</label>
+                        <div class="input-wrap">
+                            <span class="input-icon">🌧️</span>
+                            <input type="number" id="rainfall" name="rainfall"
+                                   placeholder="e.g. 7.3" step="0.1" min="0"
+                                   value="{{ request.form.rainfall if request.form.rainfall else '' }}">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="sunlight">Sunlight (hours)</label>
+                        <div class="input-wrap">
+                            <span class="input-icon">☀️</span>
+                            <input type="number" id="sunlight" name="sunlight"
+                                   placeholder="e.g. 4.4" step="0.1" min="0" max="24"
+                                   value="{{ request.form.sunlight if request.form.sunlight else '' }}">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    <span>Run Prediction &nbsp;<span class="btn-arrow">→</span></span>
+                </button>
+
+            </form>
+
+            {% if prediction %}
+            <div class="result-box">
+                <div class="result-icon">🌡️</div>
+                <div>
+                    <div class="result-label">Predicted Temperature</div>
+                    <div class="result-model-tag">via {{ model_label }}</div>
+                    <div class="result-value">{{ prediction }} °C</div>
+                    <div class="result-temp-context" id="tempContext"></div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- ══════════════════════════════════════
+                 MODEL COMPARISON CHART
+            ══════════════════════════════════════ -->
+            <div class="comparison-section">
+                <div class="comparison-header">
+                    <div class="comparison-title">📊 Model Accuracy Comparison</div>
+                    <div class="comparison-badge">R² Score · Test Set</div>
+                </div>
+
+                <div class="comparison-bars">
+
+                    <!-- Ensemble -->
+                    <div class="cbar-row">
+                        <div class="cbar-meta">
+                            <div class="cbar-label">
+                                <span class="cbar-icon">🏆</span>
+                                Ensemble Voting
+                                <span style="font-size:8px;color:var(--warm-amber);margin-left:4px;">★ Recommended</span>
+                            </div>
+                            <div class="cbar-score ensemble">85.6%</div>
+                        </div>
+                        <div class="cbar-track">
+                            <div class="cbar-fill ensemble" style="width:85.6%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Gradient Boosting -->
+                    <div class="cbar-row">
+                        <div class="cbar-meta">
+                            <div class="cbar-label">
+                                <span class="cbar-icon">🚀</span>
+                                Gradient Boosting
+                            </div>
+                            <div class="cbar-score gb">84.2%</div>
+                        </div>
+                        <div class="cbar-track">
+                            <div class="cbar-fill gb" style="width:84.2%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Random Forest -->
+                    <div class="cbar-row">
+                        <div class="cbar-meta">
+                            <div class="cbar-label">
+                                <span class="cbar-icon">🌲</span>
+                                Random Forest
+                            </div>
+                            <div class="cbar-score rf">82.6%</div>
+                        </div>
+                        <div class="cbar-track">
+                            <div class="cbar-fill rf" style="width:82.6%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Linear Regression -->
+                    <div class="cbar-row">
+                        <div class="cbar-meta">
+                            <div class="cbar-label">
+                                <span class="cbar-icon">📈</span>
+                                Linear Regression
+                            </div>
+                            <div class="cbar-score lr">87.3%</div>
+                        </div>
+                        <div class="cbar-track">
+                            <div class="cbar-fill lr" style="width:87.3%"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="comparison-byline">ThermoML v2.0 · By Dikachi Baron</div>
+            </div>
+            <!-- END Model Comparison Chart -->
+
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         FOOTER  (disclaimer removed)
+    ══════════════════════════════════════ -->
+    <footer>
+        <div class="footer-grid">
+
+            <!-- Brand -->
+            <div>
+                <div class="footer-logo">
+                    <div class="footer-logo-icon">🌡️</div>
+                    <span class="footer-logo-text">ThermoML</span>
+                </div>
+                <p class="footer-desc">
+                    Precision temperature forecasting powered by four machine learning models. Enter atmospheric conditions and get an instant ML-driven prediction — no guesswork, no hard data pull.
+                </p>
+                <div class="built-by-card">
+                    <img class="built-by-avatar"
+                         src="https://unavatar.io/twitter/Baron_dikachi"
+                         alt="Dikachi Baron"
+                         onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                    <div class="built-by-avatar-fallback">DB</div>
+                    <div>
+                        <div class="built-by-label">Built by</div>
+                        <div class="built-by-name">Dikachi Baron</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Links -->
+            <div>
+                <div class="footer-col-title">Quick Links</div>
+                <ul class="footer-links">
+                    <li><a href="#">Temperature Predictor</a></li>
+                    <li><a href="#">How It Works</a></li>
+                    <li><a href="#">Model Info</a></li>
+                    <li><a href="#">FAQs</a></li>
+                </ul>
+            </div>
+
+            <!-- Connect -->
+            <div>
+                <div class="footer-col-title">Connect</div>
+                <ul class="footer-links">
+                    <li><a href="https://x.com/Baron_dikachi" target="_blank" rel="noopener noreferrer">X / Twitter</a></li>
+                    <li><a href="https://www.linkedin.com/in/dikachi-sunday-a4a380356" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
+                    <li><a href="https://www.facebook.com/share/18H6wLY1fW/" target="_blank" rel="noopener noreferrer">Facebook</a></li>
+                    <li><a href="https://github.com/Dikachi32" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+                </ul>
+                <div class="follow-label">Follow</div>
+                <div class="social-row">
+                    <a class="social-btn tw" href="https://x.com/Baron_dikachi" target="_blank" rel="noopener noreferrer" title="X / Twitter">
+                        <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.261 5.633 5.903-5.633Zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                    </a>
+                    <a class="social-btn li" href="https://www.linkedin.com/in/dikachi-sunday-a4a380356" target="_blank" rel="noopener noreferrer" title="LinkedIn">
+                        <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                    </a>
+                    <a class="social-btn fb" href="https://www.facebook.com/share/18H6wLY1fW/" target="_blank" rel="noopener noreferrer" title="Facebook">
+                        <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                    </a>
+                    <a class="social-btn gh" href="https://github.com/Dikachi32" target="_blank" rel="noopener noreferrer" title="GitHub">
+                        <svg viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="footer-bottom">
+            <span class="footer-copy">© 2026 ThermoML · Dikachi Baron · All rights reserved.</span>
+            <div class="footer-chips">
+                <div class="chip"><span class="chip-dot"></span> Model Active</div>
+                <div class="chip">ML v2.0</div>
+                <div class="chip">Flask</div>
+            </div>
+        </div>
+
+    </footer>
+
+</div>
+
+<!-- ══════════════════════════════════════
+     LIVE WEATHER JS
+══════════════════════════════════════ -->
+<script>
+(function () {
+    const WMO = {
+        0:{icon:'☀️',label:'Clear sky'},1:{icon:'🌤️',label:'Mainly clear'},
+        2:{icon:'⛅',label:'Partly cloudy'},3:{icon:'☁️',label:'Overcast'},
+        45:{icon:'🌫️',label:'Foggy'},48:{icon:'🌫️',label:'Icy fog'},
+        51:{icon:'🌦️',label:'Light drizzle'},53:{icon:'🌦️',label:'Moderate drizzle'},
+        55:{icon:'🌧️',label:'Dense drizzle'},61:{icon:'🌧️',label:'Slight rain'},
+        63:{icon:'🌧️',label:'Moderate rain'},65:{icon:'🌧️',label:'Heavy rain'},
+        71:{icon:'🌨️',label:'Slight snow'},73:{icon:'🌨️',label:'Moderate snow'},
+        75:{icon:'❄️',label:'Heavy snow'},80:{icon:'🌦️',label:'Rain showers'},
+        81:{icon:'🌧️',label:'Heavy showers'},82:{icon:'⛈️',label:'Violent showers'},
+        95:{icon:'⛈️',label:'Thunderstorm'},96:{icon:'⛈️',label:'Thunderstorm + hail'},
+        99:{icon:'⛈️',label:'Heavy thunderstorm'}
+    };
+
+    function getWMO(c){ return WMO[c] || {icon:'🌡️',label:'Unknown'}; }
+
+    function showError(){
+        document.getElementById('weatherLoading').style.display='none';
+        document.getElementById('weatherError').style.display='flex';
+    }
+
+    function showWeather(data, city, country){
+        document.getElementById('weatherLoading').style.display='none';
+        const c=data.current, h=data.hourly, wmo=getWMO(c.weather_code);
+
+        document.getElementById('wCity').textContent    = city||'Your Location';
+        document.getElementById('wCountry').textContent = country||'';
+        document.getElementById('wDate').textContent    = new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+        document.getElementById('wIcon').textContent    = wmo.icon;
+        document.getElementById('wDesc').textContent    = wmo.label;
+        document.getElementById('wTemp').textContent    = Math.round(c.temperature_2m);
+        document.getElementById('wFeels').textContent   = 'Feels like '+Math.round(c.apparent_temperature)+'°C';
+        document.getElementById('wHumidity').textContent= c.relative_humidity_2m+'%';
+        document.getElementById('wWind').textContent    = c.wind_speed_10m+' km/h';
+        document.getElementById('wPressure').textContent= c.surface_pressure ? Math.round(c.surface_pressure)+' hPa' : '--';
+        document.getElementById('wRain').textContent    = (c.precipitation??0)+' mm';
+        document.getElementById('wUV').textContent      = c.uv_index??'--';
+
+        const now=new Date(), strip=document.getElementById('wHourly');
+        strip.innerHTML='';
+        let count=0;
+        for(let i=0;i<h.time.length&&count<12;i++){
+            const t=new Date(h.time[i]);
+            if(t<now&&count===0) continue;
+            const hw=getWMO(h.weather_code[i]);
+            const label=count===0?'Now':t.toLocaleTimeString('en-US',{hour:'numeric',hour12:true});
+            const el=document.createElement('div');
+            el.className='forecast-hour'+(count===0?' now-slot':'');
+            el.innerHTML=`<span class="fh-time">${label}</span><span class="fh-icon">${hw.icon}</span><span class="fh-temp">${Math.round(h.temperature_2m[i])}°</span>`;
+            strip.appendChild(el);
+            count++;
+        }
+
+        document.getElementById('weatherContent').style.display='block';
+
+        try {
+            const today=Math.ceil((now-new Date(now.getFullYear(),0,0))/86400000);
+            const fday=document.getElementById('day');     if(fday&&!fday.value) fday.value=today;
+            const fhum=document.getElementById('humidity');if(fhum&&!fhum.value) fhum.value=c.relative_humidity_2m;
+            const fpre=document.getElementById('pressure');if(fpre&&!fpre.value&&c.surface_pressure) fpre.value=Math.round(c.surface_pressure);
+            const fwin=document.getElementById('wind_speed');if(fwin&&!fwin.value) fwin.value=c.wind_speed_10m;
+            const frai=document.getElementById('rainfall');if(frai&&!frai.value) frai.value=c.precipitation??0;
+        } catch(e){}
+    }
+
+    async function fetchWeather(lat,lon){
+        const wURL=`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}`
+            +`&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weather_code,wind_speed_10m,surface_pressure,uv_index`
+            +`&hourly=temperature_2m,weather_code&timezone=auto&forecast_days=2`;
+        const gURL=`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`;
+
+        const [wRes,gRes]=await Promise.all([fetch(wURL),fetch(gURL,{headers:{'Accept-Language':'en'}})]);
+        if(!wRes.ok) throw new Error('fail');
+        const wData=await wRes.json();
+        const gData=gRes.ok?await gRes.json():null;
+        let city='',country='';
+        if(gData?.address){
+            city=gData.address.city||gData.address.town||gData.address.village||gData.address.county||'';
+            country=gData.address.country||'';
+        }
+        showWeather(wData,city,country);
+    }
+
+    function init(){
+        if(!navigator.geolocation){showError();return;}
+        navigator.geolocation.getCurrentPosition(
+            pos=>fetchWeather(pos.coords.latitude,pos.coords.longitude).catch(showError),
+            ()=>showError(),
+            {timeout:10000}
+        );
+    }
+
+    // Contextual label for prediction result
+    const predEl=document.querySelector('.result-value');
+    if(predEl){
+        const val=parseFloat(predEl.textContent);
+        if(!isNaN(val)){
+            const ctx=document.getElementById('tempContext');
+            if(ctx){
+                let tag='';
+                if(val<0)       tag='🥶 Freezing conditions';
+                else if(val<10) tag='🧥 Very cold';
+                else if(val<18) tag='🌬️ Cool';
+                else if(val<25) tag='😊 Comfortable';
+                else if(val<32) tag='☀️ Warm';
+                else if(val<38) tag='🌡️ Hot';
+                else            tag='🔥 Extreme heat';
+                ctx.textContent=tag;
+            }
+        }
+    }
+
+    init();
+})();
+</script>
+
+</body>
+</html>

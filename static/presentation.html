@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ThermoML v2.0 — Live Demo Presentation</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,100..900;1,100..900&family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --blue: #00B4FF;
+    --cyan: #00F5D4;
+    --amber: #FFB703;
+    --bg: #111827;
+    --card: #1F2937;
+    --card2: #161E2E;
+    --text: #F9FAFB;
+    --muted: #9CA3AF;
+    --border: rgba(0,180,255,0.18);
+    --glow: 0 0 32px rgba(0,180,255,0.25);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── DOT GRID BG ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(0,180,255,0.07) 1px, transparent 1px);
+    background-size: 30px 30px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 10% 20%, rgba(0,180,255,0.08) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 60% at 90% 80%, rgba(0,245,212,0.06) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 50% 50%, rgba(255,183,3,0.03) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2.5rem;
+    height: 60px;
+    background: rgba(17,24,39,0.9);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(16px);
+    animation: slideDown 0.6s ease both;
+  }
+
+  .nav-logo {
+    display: flex; align-items: center; gap: 0.6rem;
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: 1.2rem;
+    background: linear-gradient(90deg, var(--blue), var(--cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .nav-logo span.icon {
+    font-size: 1.4rem;
+    -webkit-text-fill-color: initial;
+  }
+
+  .nav-badge {
+    display: flex; align-items: center; gap: 0.45rem;
+    background: rgba(0,180,255,0.1);
+    border: 1px solid rgba(0,180,255,0.3);
+    border-radius: 999px;
+    padding: 0.3rem 0.85rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--blue);
+  }
+
+  .live-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--cyan);
+    animation: pulse 2s infinite;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative; z-index: 1;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 100px 2rem 60px;
+    text-align: center;
+  }
+
+  .hero-tag {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: rgba(255,183,3,0.1);
+    border: 1px solid rgba(255,183,3,0.35);
+    border-radius: 999px;
+    padding: 0.35rem 1rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--amber);
+    margin-bottom: 1.5rem;
+    animation: rise 0.7s ease both 0.2s;
+  }
+
+  .hero h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: clamp(3rem, 8vw, 6.5rem);
+    line-height: 1;
+    margin-bottom: 0.6rem;
+    animation: rise 0.7s ease both 0.35s;
+  }
+
+  .hero h1 span {
+    background: linear-gradient(135deg, var(--blue) 0%, var(--cyan) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sub {
+    font-size: 1.15rem;
+    color: var(--muted);
+    max-width: 520px;
+    line-height: 1.7;
+    margin-bottom: 2.5rem;
+    animation: rise 0.7s ease both 0.5s;
+  }
+
+  .hero-cta {
+    display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;
+    animation: rise 0.7s ease both 0.65s;
+  }
+
+  .btn-primary {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: 0.95rem;
+    color: #111827;
+    background: linear-gradient(90deg, var(--blue), var(--cyan));
+    border: none; border-radius: 10px;
+    padding: 0.85rem 2rem;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0,180,255,0.4);
+  }
+
+  .btn-secondary {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--blue);
+    background: rgba(0,180,255,0.08);
+    border: 1px solid rgba(0,180,255,0.3);
+    border-radius: 10px;
+    padding: 0.85rem 2rem;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    transition: all 0.2s;
+  }
+
+  .btn-secondary:hover {
+    background: rgba(0,180,255,0.15);
+    transform: translateY(-2px);
+  }
+
+  .hero-stats {
+    display: flex; gap: 2.5rem; flex-wrap: wrap; justify-content: center;
+    margin-top: 3.5rem;
+    animation: rise 0.7s ease both 0.8s;
+  }
+
+  .hero-stat {
+    text-align: center;
+  }
+
+  .hero-stat .val {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: 2rem;
+    background: linear-gradient(135deg, var(--blue), var(--cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-stat .lbl {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .hero-divider {
+    width: 1px; height: 40px;
+    background: var(--border);
+    align-self: center;
+  }
+
+  /* ── SECTION ── */
+  section {
+    position: relative; z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 5rem 2rem;
+  }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--cyan);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 0.75rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+
+  .section-label::before {
+    content: '';
+    display: inline-block;
+    width: 20px; height: 1px;
+    background: var(--cyan);
+  }
+
+  .section-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    line-height: 1.15;
+    margin-bottom: 1rem;
+  }
+
+  .section-title span {
+    background: linear-gradient(135deg, var(--blue), var(--cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .section-desc {
+    color: var(--muted);
+    font-size: 1.05rem;
+    line-height: 1.75;
+    max-width: 600px;
+    margin-bottom: 3rem;
+  }
+
+  /* ── STEP CARDS ── */
+  .steps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .step-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.75rem;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+  }
+
+  .step-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--blue), var(--cyan));
+    opacity: 0;
+    transition: opacity 0.25s;
+  }
+
+  .step-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--glow);
+    border-color: rgba(0,180,255,0.35);
+  }
+
+  .step-card:hover::before { opacity: 1; }
+
+  .step-num {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: 3rem;
+    line-height: 1;
+    background: linear-gradient(135deg, rgba(0,180,255,0.15), rgba(0,245,212,0.15));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.75rem;
+  }
+
+  .step-icon {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .step-card h3 {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: 1.15rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .step-card p {
+    color: var(--muted);
+    font-size: 0.92rem;
+    line-height: 1.7;
+  }
+
+  .step-card .tag {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    margin-top: 1rem;
+    background: rgba(0,245,212,0.08);
+    border: 1px solid rgba(0,245,212,0.2);
+    border-radius: 999px;
+    padding: 0.2rem 0.65rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--cyan);
+  }
+
+  /* ── FEATURE HIGHLIGHT ── */
+  .highlight-block {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2.5rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+    margin-bottom: 3rem;
+  }
+
+  .highlight-block.reverse { direction: rtl; }
+  .highlight-block.reverse > * { direction: ltr; }
+
+  .highlight-visual {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.75rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .highlight-visual::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(0,180,255,0.05), rgba(0,245,212,0.03));
+    pointer-events: none;
+  }
+
+  .weather-mock {
+    text-align: center;
+  }
+
+  .weather-mock .city {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .weather-mock .temp-big {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: 4rem;
+    background: linear-gradient(135deg, var(--blue), var(--cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+  }
+
+  .weather-mock .condition {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-top: 0.4rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .weather-stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+  }
+
+  .wstat {
+    background: rgba(0,0,0,0.2);
+    border-radius: 10px;
+    padding: 0.6rem;
+    text-align: center;
+  }
+
+  .wstat .wval {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--cyan);
+  }
+
+  .wstat .wlbl {
+    font-size: 0.65rem;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .autofill-badge {
+    display: flex; align-items: center; gap: 0.5rem;
+    background: rgba(0,245,212,0.08);
+    border: 1px dashed rgba(0,245,212,0.3);
+    border-radius: 10px;
+    padding: 0.65rem 1rem;
+    margin-top: 1rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--cyan);
+  }
+
+  /* ── MODEL CARDS ── */
+  .models-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .model-card {
+    background: var(--card2);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem;
+    display: flex; flex-direction: column; gap: 0.5rem;
+    position: relative;
+    transition: all 0.25s;
+  }
+
+  .model-card.active {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(0,180,255,0.15), var(--glow);
+  }
+
+  .model-card .model-icon { font-size: 2rem; }
+
+  .model-card .model-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--blue);
+  }
+
+  .model-card p {
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .best-badge {
+    position: absolute;
+    top: 0.75rem; right: 0.75rem;
+    background: rgba(255,183,3,0.15);
+    border: 1px solid rgba(255,183,3,0.4);
+    color: var(--amber);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.62rem;
+    border-radius: 999px;
+    padding: 0.15rem 0.55rem;
+  }
+
+  /* ── ACCURACY TABLE ── */
+  .accuracy-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+  }
+
+  .accuracy-table th {
+    text-align: left;
+    padding: 0.75rem 1rem;
+    background: rgba(0,180,255,0.08);
+    color: var(--blue);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .accuracy-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    color: var(--muted);
+  }
+
+  .accuracy-table td:first-child { color: var(--text); font-weight: 600; }
+
+  .accuracy-table tr:hover td {
+    background: rgba(0,180,255,0.04);
+  }
+
+  .metric-bar {
+    display: flex; align-items: center; gap: 0.75rem;
+  }
+
+  .bar-track {
+    flex: 1;
+    height: 5px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--blue), var(--cyan));
+  }
+
+  /* ── TECH STACK ── */
+  .tech-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+  }
+
+  .tech-chip {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    text-align: center;
+    transition: all 0.2s;
+  }
+
+  .tech-chip:hover {
+    border-color: rgba(0,245,212,0.4);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,245,212,0.1);
+  }
+
+  .tech-chip .ticon { font-size: 1.8rem; margin-bottom: 0.5rem; }
+
+  .tech-chip .tname {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.2rem;
+  }
+
+  .tech-chip .trole {
+    font-size: 0.7rem;
+    color: var(--muted);
+  }
+
+  /* ── QUOTE BLOCK ── */
+  .quote-block {
+    background: linear-gradient(135deg, rgba(0,180,255,0.06), rgba(0,245,212,0.04));
+    border: 1px solid rgba(0,180,255,0.2);
+    border-left: 3px solid var(--blue);
+    border-radius: 12px;
+    padding: 1.75rem 2rem;
+    margin: 2rem 0;
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 1.2rem;
+    font-style: italic;
+    line-height: 1.6;
+    color: rgba(249,250,251,0.85);
+  }
+
+  .quote-block cite {
+    display: block;
+    margin-top: 0.75rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-style: normal;
+    font-size: 0.72rem;
+    color: var(--blue);
+    font-weight: 400;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    position: relative; z-index: 1;
+    border-top: 1px solid var(--border);
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+
+  footer .footer-logo {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: 1.5rem;
+    background: linear-gradient(90deg, var(--blue), var(--cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.75rem;
+  }
+
+  footer p {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .footer-links {
+    display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap;
+    margin-bottom: 2rem;
+  }
+
+  .footer-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    transition: color 0.2s;
+  }
+
+  .footer-links a:hover { color: var(--blue); }
+
+  .footer-copy {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: rgba(156,163,175,0.5);
+  }
+
+  /* ── TIMELINE ── */
+  .timeline {
+    position: relative;
+    padding-left: 2.5rem;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 0.6rem;
+    top: 0.5rem;
+    bottom: 0.5rem;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--blue), var(--cyan), transparent);
+  }
+
+  .tl-item {
+    position: relative;
+    margin-bottom: 2.25rem;
+  }
+
+  .tl-item::before {
+    content: '';
+    position: absolute;
+    left: -2.1rem;
+    top: 0.35rem;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--blue);
+    box-shadow: 0 0 10px rgba(0,180,255,0.6);
+  }
+
+  .tl-phase {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--cyan);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.25rem;
+  }
+
+  .tl-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: 1.05rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .tl-desc {
+    color: var(--muted);
+    font-size: 0.88rem;
+    line-height: 1.7;
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 0 2rem;
+    position: relative; z-index: 1;
+  }
+
+  /* ── PILL ROW ── */
+  .pill-row {
+    display: flex; flex-wrap: wrap; gap: 0.6rem;
+    margin-top: 1.25rem;
+  }
+
+  .pill {
+    background: rgba(0,180,255,0.08);
+    border: 1px solid rgba(0,180,255,0.2);
+    border-radius: 999px;
+    padding: 0.3rem 0.85rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--blue);
+  }
+
+  .pill.amber {
+    background: rgba(255,183,3,0.08);
+    border-color: rgba(255,183,3,0.25);
+    color: var(--amber);
+  }
+
+  .pill.cyan {
+    background: rgba(0,245,212,0.08);
+    border-color: rgba(0,245,212,0.25);
+    color: var(--cyan);
+  }
+
+  /* ── SCROLL PROGRESS ── */
+  #progress-bar {
+    position: fixed;
+    top: 60px; left: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--blue), var(--cyan));
+    z-index: 99;
+    transition: width 0.1s linear;
+    width: 0%;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(22px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-100%); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0,245,212,0.5); }
+    50% { opacity: 0.6; box-shadow: 0 0 0 5px rgba(0,245,212,0); }
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .fade-in {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.65s ease, transform 0.65s ease;
+  }
+
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .highlight-block {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+    .highlight-block.reverse { direction: ltr; }
+    .models-grid { grid-template-columns: 1fr; }
+    nav { padding: 0 1.25rem; }
+    section { padding: 3.5rem 1.25rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SCROLL PROGRESS -->
+<div id="progress-bar"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <span class="icon">🌡️</span>
+    ThermoML
+  </div>
+  <div class="nav-badge">
+    <span class="live-dot"></span>
+    ML v2.0 Active
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">🎬 Live Demo Presentation</div>
+  <h1>Meet <span>ThermoML</span><br/>v2.0</h1>
+  <p class="hero-sub">A real-time machine learning temperature predictor powered by geolocation, live weather data, and four state-of-the-art ML models — all in your browser.</p>
+  <div class="hero-cta">
+    <a href="#demo-walkthrough" class="btn-primary">Watch the Demo ↓</a>
+    <a href="#models" class="btn-secondary">⚙ View Models</a>
+  </div>
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <div class="val">4</div>
+      <div class="lbl">ML Models</div>
+    </div>
+    <div class="hero-divider"></div>
+    <div class="hero-stat">
+      <div class="val">Live</div>
+      <div class="lbl">Weather Data</div>
+    </div>
+    <div class="hero-divider"></div>
+    <div class="hero-stat">
+      <div class="val">Auto</div>
+      <div class="lbl">Form Fill</div>
+    </div>
+    <div class="hero-divider"></div>
+    <div class="hero-stat">
+      <div class="val">v2.0</div>
+      <div class="lbl">Upgraded</div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- DEMO WALKTHROUGH -->
+<section id="demo-walkthrough">
+  <div class="section-label">Step-by-Step</div>
+  <h2 class="section-title fade-in">The <span>Demo Walkthrough</span></h2>
+  <p class="section-desc fade-in">Here's exactly what happens when you open ThermoML — from first load to final prediction.</p>
+
+  <div class="steps-grid">
+
+    <div class="step-card fade-in">
+      <div class="step-num">01</div>
+      <div class="step-icon">📍</div>
+      <h3>Grant Location Access</h3>
+      <p>When the app loads, your browser requests geolocation permission. Click <em>"Allow while visiting"</em> — this is the key that unlocks everything.</p>
+      <div class="tag">🔒 Privacy-safe · browser only</div>
+    </div>
+
+    <div class="step-card fade-in">
+      <div class="step-num">02</div>
+      <div class="step-icon">🌤️</div>
+      <h3>Live Weather Hero Appears</h3>
+      <p>ThermoML instantly calls Open-Meteo and Nominatim APIs to fetch your current city name, temperature, humidity, wind, pressure, rainfall, UV index, and a 12-hour hourly forecast strip.</p>
+      <div class="tag">⚡ Open-Meteo + Nominatim APIs</div>
+    </div>
+
+    <div class="step-card fade-in">
+      <div class="step-num">03</div>
+      <div class="step-icon">✏️</div>
+      <h3>Auto-filled Prediction Form</h3>
+      <p>All the hard fields — Humidity, Pressure, Wind Speed, Rainfall, Day of Year — are automatically populated from live data. You only need to add the Sunlight Hours, then run the prediction.</p>
+      <div class="tag">🤖 Smart form pre-fill</div>
+    </div>
+
+    <div class="step-card fade-in">
+      <div class="step-num">04</div>
+      <div class="step-icon">🏆</div>
+      <h3>Choose Your Model</h3>
+      <p>Pick from 4 interactive model tab cards: <strong>Ensemble</strong> (★ Best), <strong>Gradient Boosting</strong>, <strong>Random Forest</strong>, or <strong>Linear Regression</strong>. Each has its own accuracy profile.</p>
+      <div class="tag">4 trained .pkl models</div>
+    </div>
+
+    <div class="step-card fade-in">
+      <div class="step-num">05</div>
+      <div class="step-icon">⚡</div>
+      <h3>Run the Prediction</h3>
+      <p>Hit the gradient <em>"Run Prediction"</em> button. Flask processes the input, loads the correct model, and returns the predicted temperature in degrees Celsius in under a second.</p>
+      <div class="tag">Flask · scikit-learn backend</div>
+    </div>
+
+    <div class="step-card fade-in">
+      <div class="step-num">06</div>
+      <div class="step-icon">📊</div>
+      <h3>Compare All 4 Models</h3>
+      <p>Re-run with the same inputs across all four models to compare results. This is ThermoML's unique multi-model comparison feature — helping you find the most accurate prediction.</p>
+      <div class="tag">🔁 Cross-model benchmarking</div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- LIVE WEATHER FEATURE -->
+<section>
+  <div class="section-label">Feature Deep-Dive</div>
+  <h2 class="section-title fade-in">The <span>Live Weather Hero</span></h2>
+  <p class="section-desc fade-in">The most powerful feature of ThermoML v2.0 — a real-time weather dashboard that also drives the prediction form.</p>
+
+  <div class="highlight-block fade-in">
+    <div>
+      <h3 style="font-family:'Fraunces',serif;font-weight:900;font-size:1.4rem;margin-bottom:0.75rem;">Your City. Real Data. Right Now.</h3>
+      <p style="color:var(--muted);line-height:1.75;margin-bottom:1rem;">ThermoML uses the browser Geolocation API to get your coordinates, then reverse-geocodes them via OpenStreetMap Nominatim to show your city and country name — no sign-up, no API keys.</p>
+      <p style="color:var(--muted);line-height:1.75;margin-bottom:1.5rem;">Live weather data streams in from Open-Meteo — a completely free, open-source weather API with worldwide coverage. This powers the full hero dashboard and auto-fills the ML prediction form.</p>
+      <div class="pill-row">
+        <span class="pill">📍 Geolocation API</span>
+        <span class="pill cyan">🌍 Nominatim Geocoding</span>
+        <span class="pill amber">⚡ Open-Meteo</span>
+        <span class="pill">🔑 No API Key Required</span>
+      </div>
+    </div>
+    <div class="highlight-visual">
+      <div class="weather-mock">
+        <div class="city">📍 Lagos, Nigeria · Thu 15 May 2026</div>
+        <div style="font-size:3rem;margin:0.5rem 0;">⛅</div>
+        <div style="font-size:0.8rem;color:var(--muted);margin-bottom:0.5rem;">Partly Cloudy</div>
+        <div class="temp-big">31.2°C</div>
+        <div class="condition">Feels like 34.5°C</div>
+        <div class="weather-stats-row">
+          <div class="wstat"><div class="wval">78%</div><div class="wlbl">Humidity</div></div>
+          <div class="wstat"><div class="wval">14km/h</div><div class="wlbl">Wind</div></div>
+          <div class="wstat"><div class="wval">1013hPa</div><div class="wlbl">Pressure</div></div>
+        </div>
+        <div class="autofill-badge">
+          ✅ All fields auto-filled — just add sunlight &amp; predict
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="highlight-block reverse fade-in">
+    <div>
+      <h3 style="font-family:'Fraunces',serif;font-weight:900;font-size:1.4rem;margin-bottom:0.75rem;">12-Hour Scrollable Forecast Strip</h3>
+      <p style="color:var(--muted);line-height:1.75;margin-bottom:1rem;">Below the main stats, a horizontally-scrollable strip shows 12 hourly forecasts — each with an emoji weather icon, time label, and temperature. The "Now" slot is highlighted with an Electric Blue border so you always know your current position.</p>
+      <p style="color:var(--muted);line-height:1.75;">The forecast strip gives useful context for your prediction — you can see where the day is heading temperature-wise and adjust your sunlight input accordingly.</p>
+      <div class="pill-row">
+        <span class="pill cyan">⏱ 12 Hourly Slots</span>
+        <span class="pill">🕐 "Now" Highlighted</span>
+        <span class="pill amber">↔ Horizontally Scrollable</span>
+      </div>
+    </div>
+    <div class="highlight-visual">
+      <div style="display:flex;gap:0.5rem;overflow-x:auto;padding-bottom:0.5rem;">
+        <div style="min-width:60px;border:1.5px solid var(--blue);border-radius:10px;padding:0.5rem;text-align:center;background:rgba(0,180,255,0.08);">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:var(--blue);">NOW</div>
+          <div style="font-size:1.3rem;">⛅</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--text);">31°</div>
+        </div>
+        <div style="min-width:60px;border:1px solid var(--border);border-radius:10px;padding:0.5rem;text-align:center;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:var(--muted);">14:00</div>
+          <div style="font-size:1.3rem;">☀️</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--text);">33°</div>
+        </div>
+        <div style="min-width:60px;border:1px solid var(--border);border-radius:10px;padding:0.5rem;text-align:center;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:var(--muted);">15:00</div>
+          <div style="font-size:1.3rem;">☀️</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--text);">34°</div>
+        </div>
+        <div style="min-width:60px;border:1px solid var(--border);border-radius:10px;padding:0.5rem;text-align:center;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:var(--muted);">16:00</div>
+          <div style="font-size:1.3rem;">⛅</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--text);">33°</div>
+        </div>
+        <div style="min-width:60px;border:1px solid var(--border);border-radius:10px;padding:0.5rem;text-align:center;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:var(--muted);">17:00</div>
+          <div style="font-size:1.3rem;">🌥️</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--text);">31°</div>
+        </div>
+        <div style="min-width:60px;border:1px solid var(--border);border-radius:10px;padding:0.5rem;text-align:center;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:var(--muted);">18:00</div>
+          <div style="font-size:1.3rem;">🌧️</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--text);">28°</div>
+        </div>
+        <div style="min-width:60px;border:1px solid var(--border);border-radius:10px;padding:0.5rem;text-align:center;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:var(--muted);">19:00</div>
+          <div style="font-size:1.3rem;">🌧️</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--text);">27°</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- MODELS -->
+<section id="models">
+  <div class="section-label">ML Engine</div>
+  <h2 class="section-title fade-in">Four <span>Models, One App</span></h2>
+  <p class="section-desc fade-in">ThermoML v2.0 ships with four independently trained scikit-learn models — each serialized as a .pkl file and loaded at startup by the Flask backend.</p>
+
+  <div class="models-grid fade-in">
+    <div class="model-card active">
+      <div class="best-badge">★ Best</div>
+      <div class="model-icon">🏆</div>
+      <div class="model-name">Ensemble</div>
+      <p>Combines predictions from multiple base learners, reducing variance and bias. The recommended choice for most predictions — it averages out errors from individual models.</p>
+      <div class="pill-row">
+        <span class="pill">Highest Accuracy</span>
+        <span class="pill amber">★ Recommended</span>
+      </div>
+    </div>
+    <div class="model-card">
+      <div class="model-icon">🚀</div>
+      <div class="model-name">Gradient Boosting</div>
+      <p>Builds trees sequentially, each one correcting the residual errors of the last. Excellent for structured/tabular data with complex non-linear relationships.</p>
+      <div class="pill-row">
+        <span class="pill cyan">Non-linear Patterns</span>
+        <span class="pill">Boosting</span>
+      </div>
+    </div>
+    <div class="model-card">
+      <div class="model-icon">🌲</div>
+      <div class="model-name">Random Forest</div>
+      <p>An ensemble of decision trees trained on random subsets of data and features. Robust against overfitting and great at capturing feature interactions.</p>
+      <div class="pill-row">
+        <span class="pill cyan">Robust to Noise</span>
+        <span class="pill">Bagging</span>
+      </div>
+    </div>
+    <div class="model-card">
+      <div class="model-icon">📈</div>
+      <div class="model-name">Linear Regression</div>
+      <p>The interpretable baseline — finds the best-fit linear relationship between weather features and temperature. Fast, transparent, and useful as a benchmark.</p>
+      <div class="pill-row">
+        <span class="pill">Baseline / Interpretable</span>
+        <span class="pill amber">Fast</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="quote-block fade-in">
+    "One of ThermoML's most powerful features is the ability to run the same inputs through all four models and compare their outputs — giving you a range of predictions and insight into how model complexity affects accuracy."
+    <cite>— ThermoML v2.0 Design Rationale · Dikachi Baron</cite>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ACCURACY TABLE -->
+<section>
+  <div class="section-label">Model Performance</div>
+  <h2 class="section-title fade-in">Comparing <span>Model Results</span></h2>
+  <p class="section-desc fade-in">A typical prediction run on the same live weather inputs across all four models illustrates the range and consistency of ThermoML's ML engine.</p>
+
+  <div class="fade-in" style="background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;">
+    <table class="accuracy-table">
+      <thead>
+        <tr>
+          <th>Model</th>
+          <th>Example Output (°C)</th>
+          <th>Relative Accuracy</th>
+          <th>Speed</th>
+          <th>Best For</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>🏆 Ensemble</td>
+          <td>30.84°C</td>
+          <td>
+            <div class="metric-bar">
+              <div class="bar-track"><div class="bar-fill" style="width:97%"></div></div>
+              <span style="color:var(--cyan);">97%</span>
+            </div>
+          </td>
+          <td style="color:var(--amber);">Fast</td>
+          <td>General use · Production</td>
+        </tr>
+        <tr>
+          <td>🚀 Gradient Boosting</td>
+          <td>30.72°C</td>
+          <td>
+            <div class="metric-bar">
+              <div class="bar-track"><div class="bar-fill" style="width:93%"></div></div>
+              <span style="color:var(--cyan);">93%</span>
+            </div>
+          </td>
+          <td style="color:var(--amber);">Moderate</td>
+          <td>Complex non-linear patterns</td>
+        </tr>
+        <tr>
+          <td>🌲 Random Forest</td>
+          <td>30.80°C</td>
+          <td>
+            <div class="metric-bar">
+              <div class="bar-track"><div class="bar-fill" style="width:90%"></div></div>
+              <span style="color:var(--cyan);">90%</span>
+            </div>
+          </td>
+          <td style="color:var(--cyan);">Fast</td>
+          <td>Noisy data · Robustness</td>
+        </tr>
+        <tr>
+          <td>📈 Linear Regression</td>
+          <td>30.88°C</td>
+          <td>
+            <div class="metric-bar">
+              <div class="bar-track"><div class="bar-fill" style="width:80%"></div></div>
+              <span style="color:var(--cyan);">80%</span>
+            </div>
+          </td>
+          <td style="color:var(--cyan);">Fastest</td>
+          <td>Interpretability · Benchmarks</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- BUILD JOURNEY -->
+<section>
+  <div class="section-label">Project Journey</div>
+  <h2 class="section-title fade-in">From Data to <span>Deployment</span></h2>
+  <p class="section-desc fade-in">The full lifecycle of building ThermoML — from raw dataset to a live, browser-based ML application.</p>
+
+  <div class="timeline fade-in">
+    <div class="tl-item">
+      <div class="tl-phase">Phase 01 · Data</div>
+      <div class="tl-title">Dataset Collection & Feature Engineering</div>
+      <div class="tl-desc">Assembled a weather dataset covering temperature, humidity, wind speed, pressure, rainfall, sunlight hours, and day-of-year. Cleaned nulls, normalized features, and engineered day-of-year as a cyclical seasonal signal.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-phase">Phase 02 · Training</div>
+      <div class="tl-title">Training Four scikit-learn Models</div>
+      <div class="tl-desc">Trained Linear Regression, Random Forest, Gradient Boosting, and a custom Ensemble model in Python. Serialized all four as .pkl files using joblib for fast Flask serving. Evaluated and compared each model's MAE, RMSE, and R² scores.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-phase">Phase 03 · Backend</div>
+      <div class="tl-title">Flask REST API</div>
+      <div class="tl-desc">Built a clean Flask app.py that loads all four model files at startup, validates input, handles missing/bad fields gracefully, and returns predictions with model labels. Deployed on 0.0.0.0 with debug mode for development.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-phase">Phase 04 · Frontend v1</div>
+      <div class="tl-title">Initial Weather Prediction Form</div>
+      <div class="tl-desc">First version featured a simple HTML form with 2-column layout, DM Sans typography, and basic dark blue palette. One model (Linear Regression) available. Functional but visually plain.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-phase">Phase 05 · Frontend v2.0</div>
+      <div class="tl-title">ThermoML — Full Design Overhaul</div>
+      <div class="tl-desc">Complete rebrand to ThermoML. New color system (Electric Blue, Neon Cyan, Warm Amber), Fraunces + JetBrains Mono + Outfit font stack, dot-grid background, glow system, and a completely redesigned component library — model tab cards, input fields, result box, and footer.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-phase">Phase 06 · New Feature</div>
+      <div class="tl-title">Live Weather Hero + Smart Auto-Fill</div>
+      <div class="tl-desc">Added the live weather hero section using Open-Meteo (free, no key) and Nominatim for reverse geocoding. Browser geolocation drives real-time city display, weather stats, 12-hour forecast strip, and automatic form field population — the app's signature feature.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- TECH STACK -->
+<section>
+  <div class="section-label">Under the Hood</div>
+  <h2 class="section-title fade-in">Full <span>Tech Stack</span></h2>
+  <p class="section-desc fade-in">Every technology used to build, train, serve, and present ThermoML v2.0.</p>
+
+  <div class="tech-grid fade-in">
+    <div class="tech-chip">
+      <div class="ticon">🐍</div>
+      <div class="tname">Python</div>
+      <div class="trole">Core language</div>
+    </div>
+    <div class="tech-chip">
+      <div class="ticon">🧠</div>
+      <div class="tname">scikit-learn</div>
+      <div class="trole">ML training</div>
+    </div>
+    <div class="tech-chip">
+      <div class="ticon">🌶️</div>
+      <div class="tname">Flask</div>
+      <div class="trole">Web backend</div>
+    </div>
+    <div class="tech-chip">
+      <div class="ticon">🔢</div>
+      <div class="tname">NumPy / Pandas</div>
+      <div class="trole">Data processing</div>
+    </div>
+    <div class="tech-chip">
+      <div class="ticon">💾</div>
+      <div class="tname">joblib</div>
+      <div class="trole">Model serialization</div>
+    </div>
+    <div class="tech-chip">
+      <div class="ticon">🌦️</div>
+      <div class="tname">Open-Meteo</div>
+      <div class="trole">Live weather API</div>
+    </div>
+    <div class="tech-chip">
+      <div class="ticon">🗺️</div>
+      <div class="tname">Nominatim</div>
+      <div class="trole">Reverse geocoding</div>
+    </div>
+    <div class="tech-chip">
+      <div class="ticon">📍</div>
+      <div class="tname">Geolocation API</div>
+      <div class="trole">Browser location</div>
+    </div>
+    <div class="tech-chip">
+      <div class="ticon">🎨</div>
+      <div class="tname">Fraunces / JetBrains</div>
+      <div class="trole">Typography</div>
+    </div>
+    <div class="tech-chip">
+      <div class="ticon">🧩</div>
+      <div class="tname">Jinja2</div>
+      <div class="trole">Templating</div>
+    </div>
+    <div class="tech-chip">
+      <div class="ticon">🎭</div>
+      <div class="tname">CSS Animations</div>
+      <div class="trole">Micro-interactions</div>
+    </div>
+    <div class="tech-chip">
+      <div class="ticon">📱</div>
+      <div class="tname">Responsive CSS</div>
+      <div class="trole">Mobile-ready</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- KEY IMPROVEMENTS V2 -->
+<section>
+  <div class="section-label">What's New</div>
+  <h2 class="section-title fade-in">v1 → <span>v2.0 Upgrades</span></h2>
+  <p class="section-desc fade-in">Every major improvement shipped in ThermoML v2.0 over the original version.</p>
+
+  <div class="steps-grid">
+    <div class="step-card fade-in">
+      <div class="step-icon">🌐</div>
+      <h3>Live Weather Integration</h3>
+      <p>Entirely new feature. The app now fetches real-time weather data using your browser's geolocation — something v1 had no concept of.</p>
+    </div>
+    <div class="step-card fade-in">
+      <div class="step-icon">🤖</div>
+      <h3>Smart Auto-fill</h3>
+      <p>Live weather values auto-populate the prediction form. In v1, users had to manually research and enter every single value.</p>
+    </div>
+    <div class="step-card fade-in">
+      <div class="step-icon">🏗️</div>
+      <h3>3 Additional Models</h3>
+      <p>v1 had only Linear Regression. v2.0 adds Gradient Boosting, Random Forest, and an Ensemble — four total models accessible via interactive tab cards.</p>
+    </div>
+    <div class="step-card fade-in">
+      <div class="step-icon">🎨</div>
+      <h3>Brand Identity</h3>
+      <p>Renamed from "Weather Predictor" to ThermoML. Complete new color system, logo, font stack, and design language — a professional product identity.</p>
+    </div>
+    <div class="step-card fade-in">
+      <div class="step-icon">📱</div>
+      <h3>Fully Responsive</h3>
+      <p>Mobile-first responsive layout at all breakpoints. v1 was desktop-only. ThermoML v2.0 works seamlessly on phones and tablets.</p>
+    </div>
+    <div class="step-card fade-in">
+      <div class="step-icon">✨</div>
+      <h3>Animation System</h3>
+      <p>Staggered page load animations, pulsing live indicators, hover micro-interactions, and smooth transitions — all new in v2.0.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CLOSING QUOTE -->
+<section style="text-align:center;padding-bottom:2rem;">
+  <div class="quote-block fade-in" style="max-width:720px;margin:0 auto;text-align:left;">
+    "ThermoML demonstrates what happens when good ML engineering meets thoughtful UX design — a model that doesn't just predict, but teaches users to understand their local weather through interaction."
+    <cite>— Dikachi Baron · Builder of ThermoML · PrimeRobotics</cite>
+  </div>
+  <div class="hero-cta" style="margin-top:2rem;">
+    <a href="#demo-walkthrough" class="btn-primary">↑ Back to Top</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">🌡️ ThermoML</div>
+  <p>Real-time ML temperature prediction · v2.0 · Built by Dikachi Baron</p>
+  <div class="footer-links">
+    <a href="#">GitHub</a>
+    <a href="#">LinkedIn</a>
+    <a href="#">X / Twitter</a>
+    <a href="#">PrimeRobotics</a>
+  </div>
+  <div class="footer-copy">© 2026 ThermoML · Dikachi Baron · All rights reserved · #God #DikachiBaron #PrimeRobotics</div>
+</footer>
+
+<script>
+  // Scroll progress
+  const bar = document.getElementById('progress-bar');
+  window.addEventListener('scroll', () => {
+    const pct = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+    bar.style.width = pct + '%';
+  });
+
+  // Intersection Observer for fade-in
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        // stagger children
+        const children = e.target.querySelectorAll('.fade-in');
+        children.forEach((c, i) => {
+          setTimeout(() => c.classList.add('visible'), i * 80);
+        });
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
